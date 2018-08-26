@@ -2,3 +2,6 @@
 *.gz
 *ipynb_checkpoints/
 *.txt
+../Alex/.ipynb_checkpoints/
+../Melanie/.ipynb_checkpoints/
+../Nacho/.ipynb_checkpoints/
