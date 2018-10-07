@@ -44,12 +44,12 @@ def modelfitRF(model, x_train, features, performCV=True, printFeatureImportance=
     #submission.to_csv('rf.csv', index=False)
 
 
-def modelfitxgb(model, x_train, useTrainCV=True, cv_folds=5, printFeatureImportance=True):
+def modelfitxgb(model, x_train, useTrainCV = True, cv_folds=5, printFeatureImportance=True):
     
     if useTrainCV:
         xgb_param = model.get_xgb_params()
         xgtrain = xgb.DMatrix(x_train, label=y_train)
-        xgtrain = xgb.DMatrix(np.matrix(x_train), label = y_train)
+        
         cvresult = xgb.cv(xgb_param, xgtrain, num_boost_round=model.get_params()['n_estimators'],
                           nfold=cv_folds, early_stopping_rounds=50, metrics = 'rmse')
         model.set_params(n_estimators=cvresult.shape[0])
@@ -209,3 +209,4 @@ def stacking_regression(models, meta_model, X_train, y_train, X_test,
     stacking_prediction = transformer(meta_model.predict(S_test), func = transform_pred)
 
     return stacking_prediction
+

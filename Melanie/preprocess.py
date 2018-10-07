@@ -66,9 +66,9 @@ def impute(all_data):
 
 	# MSSubClass : Na most likely means No building class. We can replace missing values with None
 	all_data['MSSubClass'] = all_data['MSSubClass'].fillna("None")
-    
-    #Tranforming numerical into categorical
-    
+
+	#Tranforming numerical into categorical
+
 	#MSSubClass=The building class
 	all_data['MSSubClass'] = all_data['MSSubClass'].apply(str)
 
@@ -113,39 +113,42 @@ def Encoder(all_data):
 			le = LabelEncoder()
 			# Need to convert the column type to string in order to encode missing values
 			all_data[c] = le.fit_transform(all_data[c].astype(str))
-    
+
 	return all_data
 
 def Skewness(X_train_preprocessed):
-    skewed_col = ['LotFrontage','LotArea','MasVnrArea','BsmtFinSF1','BsmtUnfSF','TotalBsmtSF','GrLivArea','GarageArea','WoodDeckSF','TotalSF','TotalPorchSF','BsmtUnfSF / TotalBsmtSF']
+	skewed_col = ['LotFrontage','LotArea','MasVnrArea','BsmtFinSF1','BsmtUnfSF','TotalBsmtSF','GrLivArea','GarageArea','WoodDeckSF','TotalSF','TotalPorchSF','BsmtUnfSF / TotalBsmtSF']
 
-    skewed_feat_vals = X_train_preprocessed[skewed_col].skew()
-    skewed_feats = skewed_feat_vals[skewed_feat_vals > 0.70]
-    skewed_feats = skewed_feats.index
+	skewed_feat_vals = X_train_preprocessed[skewed_col].skew()
+	skewed_feats = skewed_feat_vals[skewed_feat_vals > 0.70]
+	skewed_feats = skewed_feats.index
 
-    X_train_preprocessed.loc[:, skewed_feats] = np.log1p(X_train_preprocessed[skewed_feats])
+	X_train_preprocessed.loc[:, skewed_feats] = np.log1p(X_train_preprocessed[skewed_feats])
 
-    # alternatively for all variables
-    #skewed_vals = all_data.skew()
-    #skewed_feat = skewed_vals[skewed_vals > 0.70].index
+	# alternatively for all variables
+	#skewed_vals = all_data.skew()
+	#skewed_feat = skewed_vals[skewed_vals > 0.70].index
 
-    #all_data.loc[:, skewed_feat] = np.log1p(all_data[skewed_feat])
-    
-    return X_train_preprocessed
+	#all_data.loc[:, skewed_feat] = np.log1p(all_data[skewed_feat])
+
+	return X_train_preprocessed
 
 from sklearn.preprocessing import StandardScaler
 
-def Scaler(X_train_preprocessed, X_test_preprocessed):
-    
-    columns_transform = ['LotFrontage','LotArea','MasVnrArea','BsmtFinSF1','BsmtUnfSF','TotalBsmtSF','GrLivArea','GarageArea','WoodDeckSF','TotalSF','TotalPorchSF','BsmtUnfSF / TotalBsmtSF']
-    std = StandardScaler()
+def Scaler(train, test):
 
-    X_train_preprocessed.loc[:,columns_transform] = std.fit_transform(X_train_preprocessed[columns_transform])
-    X_test_preprocessed.loc[:,columns_transform] = std.transform(X_test_preprocessed[columns_transform])
+	train = train.copy()
+	test = test.copy()
 
-    return X_train_preprocessed, X_test_preprocessed
+	columns_transform = ['1stFlrSF', '2ndFlrSF','LotFrontage','LotArea','MasVnrArea','BsmtFinSF1','BsmtUnfSF','TotalBsmtSF','GrLivArea','GarageArea','WoodDeckSF','TotalSF','TotalPorchSF','BsmtUnfSF / TotalBsmtSF']
+	std = StandardScaler()
 
-def featEN(all_data_nomiss):
+	train.loc[:,columns_transform] = std.fit_transform(train[columns_transform])
+	test.loc[:,columns_transform] = std.transform(test[columns_transform])
+
+	return train, test
+
+def drop(all_data):
 
 	#all_data_nomiss['TotalPorchSF']  = all_data_nomiss['WoodDeckSF'] + all_data_nomiss['OpenPorchSF'] + all_data_nomiss['EnclosedPorch']  + all_data_nomiss['3SsnPorch'] + all_data_nomiss['ScreenPorch']
 	#all_data_nomiss['TotalBath'] = all_data_nomiss['BsmtFullBath'] + all_data_nomiss['FullBath'] + all_data_nomiss['HalfBath'] + all_data_nomiss['BsmtHalfBath']
@@ -153,7 +156,7 @@ def featEN(all_data_nomiss):
 	all_data_nomiss.drop(['WoodDeckSF','OPenPorchSF','EnclosedPorch','#3SsnPorch','ScreenPorch'], axis=1)
 	all_data_nomiss.drop(['BsmtFinF1','MasVnrArea'], axis=1)
 	
-	return all_data_nomiss
+	return all_data
 
 def ordinal(all_data):
 	# Transforming categorical to ordinal
@@ -169,64 +172,56 @@ def ordinal(all_data):
 			le = LabelEncoder()
 			# Need to convert the column type to string in order to encode missing values
 			all_data[c] = le.fit_transform(all_data[c].astype(str))
-    
+
 	return all_data
 
 def dummify(all_data):
 
-    mask = all_data.dtypes=='object'
-    all_data.columns[mask]
-    cat_cols = ['MSZoning', 'Street', 'Alley', 'LotShape', 'LandContour', 'Utilities',
-       'LotConfig', 'LandSlope', 'Neighborhood', 'Condition1', 'Condition2',
-       'BldgType', 'HouseStyle', 'RoofStyle', 'RoofMatl', 'Exterior1st',
-       'Exterior2nd', 'MasVnrType', 'ExterQual', 'ExterCond', 'Foundation',
-       'BsmtQual', 'BsmtCond', 'BsmtExposure', 'BsmtFinType1', 'BsmtFinType2',
-       'Heating', 'HeatingQC', 'CentralAir', 'Electrical', 'KitchenQual',
-       'Functional', 'FireplaceQu', 'GarageType', 'GarageFinish', 'GarageQual',
-       'GarageCond', 'PavedDrive', 'PoolQC', 'Fence', 'MiscFeature',
-       'SaleType', 'SaleCondition','OverallQual','OverallCond']
+	mask = all_data.dtypes=='object'
+	all_data.columns[mask]
+	cat_cols = ['MSZoning', 'Street', 'Alley', 'LotShape', 'LandContour', 'Utilities','LotConfig', 'LandSlope', 'Neighborhood', 'Condition1', 'Condition2',
+		'BldgType', 'HouseStyle', 'RoofStyle', 'RoofMatl', 'Exterior1st','Exterior2nd', 'MasVnrType', 'ExterQual', 'ExterCond', 'Foundation',
+		'BsmtQual', 'BsmtCond', 'BsmtExposure', 'BsmtFinType1', 'BsmtFinType2','Heating', 'HeatingQC', 'CentralAir', 'Electrical', 'KitchenQual',
+		'Functional', 'FireplaceQu', 'GarageType', 'GarageFinish', 'GarageQual',
+		'GarageCond', 'PavedDrive', 'PoolQC', 'Fence', 'MiscFeature',
+		'SaleType', 'SaleCondition','OverallQual','OverallCond']
 
-    mask1 = all_data.dtypes=='int64'
-    all_data.columns[mask1]
+	mask1 = all_data.dtypes=='int64'
+	all_data.columns[mask1]
 
-    mask2 = all_data.dtypes=='float64'
-    all_data.columns[mask2]
+	mask2 = all_data.dtypes=='float64'
+	all_data.columns[mask2]
 
-    num_cols = ['MSSubClass', 'LotArea','YearBuilt',
-       'YearRemodAdd', '1stFlrSF', '2ndFlrSF', 'LowQualFinSF', 'GrLivArea',
-       'FullBath', 'HalfBath', 'BedroomAbvGr', 'KitchenAbvGr', 'TotRmsAbvGrd',
-       'Fireplaces', 'WoodDeckSF', 'OpenPorchSF', 'EnclosedPorch', '3SsnPorch',
-      'ScreenPorch', 'PoolArea', 'MiscVal', 'MoSold', 'YrSold', 'LotFrontage', 'MasVnrArea', 'BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF',
-       'TotalBsmtSF', 'BsmtFullBath', 'BsmtHalfBath', 'GarageYrBlt',
-       'GarageCars', 'GarageArea']
-    
-    # identfy missing values
-    # flag missing values for each cell with new variable
-    # impute missing values with mean
+	num_cols = ['MSSubClass', 'LotArea','YearBuilt','YearRemodAdd', '1stFlrSF', '2ndFlrSF', 'LowQualFinSF', 'GrLivArea',
+				'FullBath', 'HalfBath', 'BedroomAbvGr', 'KitchenAbvGr', 'TotRmsAbvGrd','Fireplaces', 'WoodDeckSF', 'OpenPorchSF', 'EnclosedPorch', '3SsnPorch',
+				'ScreenPorch', 'PoolArea', 'MiscVal', 'MoSold', 'YrSold', 'LotFrontage', 'MasVnrArea', 'BsmtFinSF1', 'BsmtFinSF2', 'BsmtUnfSF','TotalBsmtSF', 'BsmtFullBath', 'BsmtHalfBath', 'GarageYrBlt',
+				'GarageCars', 'GarageArea']
 
-    all_data.isnull().any()
+	# identfy missing values
+	# flag missing values for each cell with new variable
+	# impute missing values with mean
 
-    # combine cat and num columns:
 
-    cat_num_cols = cat_cols + num_cols
+	# combine cat and num columns:
 
-    #Create a new variable for each variable having missing value with VariableName_NA 
-    # and flag missing value with 1 and other with 0
+	cat_num_cols = cat_cols + num_cols
 
-    for var in cat_num_cols:
-        if all_data[var].isnull().any()==True:
-            all_data[var+'_NA']=all_data[var].isnull()*1
+	#Create a new variable for each variable having missing value with VariableName_NA 
+	# and flag missing value with 1 and other with 0
 
-    all_data_nomiss = all_data.copy()
+	for var in cat_num_cols:
+		if all_data[var].isnull().any()==True:
+			all_data[var+'_NA']=all_data[var].isnull()*1
+
+	all_data_nomiss = all_data.copy()
 
 	#Impute numerical missing values with mean
 	all_data_nomiss.loc[:, num_cols] = all_data_nomiss[num_cols].fillna(all_data_nomiss[num_cols].mean())
 
 	#Impute categorical missing values with -9999
 	all_data_nomiss.loc[:, cat_cols] = all_data_nomiss[cat_cols].fillna(value = -9999)
-    
-    return all_data
-    
+
+	return all_data
 
 
 
